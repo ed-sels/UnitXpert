@@ -13,20 +13,23 @@ darkModeToggle.addEventListener("click", () => {
 
 // 🏠 Navigate to Homepage
 function goToHome() {
-    window.location.href = "/"; // Replace with the actual homepage URL
+    window.location.href = "/"; // Replace with actual homepage URL
 }
 
 // 📏 Category Change & Fact Update
+let currentInfoIndex = 0; // Keep track of the displayed fact index
+
 function changeCategory(category) {
     const title = document.getElementById("categoryTitle");
     title.textContent = category.charAt(0).toUpperCase() + category.slice(1) + " Converter";
 
     loadUnits(category); // Load units for the selected category
 
-    document.getElementById("infoText").textContent = getRandomFact(category);
+    currentInfoIndex = 0; // Reset index when category changes
+    document.getElementById("infoText").textContent = getFactByIndex(category, currentInfoIndex);
 }
 
-// 🧠 Fun Facts Storage (Updated)
+// 🧠 Fun Facts (Updated with Speed)
 const facts = {
     length: [
         "The Great Wall of China is over 21,000 km long!",
@@ -60,13 +63,23 @@ const facts = {
         "The largest swimming pool in the world holds 250 million liters of water.",
         "Your brain is roughly 1.4 liters in volume!"
     ],
+    speed: [
+        "The fastest land animal is the cheetah, reaching speeds of up to 120 km/h!",
+        "The speed of sound is approximately 343 meters per second.",
+        "The fastest recorded human speed is 44.72 km/h, achieved by Usain Bolt.",
+        "The Peregrine Falcon is the fastest bird, diving at speeds over 389 km/h (242 mph)!",
+        "The Bugatti Chiron Super Sport 300+ is the fastest car, reaching 490 km/h (304 mph).",
+        "The speed of light is about 299,792,458 meters per second!"
+    ],
     energy: [
         "A bolt of lightning releases about 1 billion joules of energy!",
         "The human body burns about 2,000 kilocalories per day on average.",
         "The Sun produces 3.8 x 10^26 watts of power every second.",
         "One gram of uranium-235 can release as much energy as 3 tons of coal.",
         "A single AA battery stores about 9,000 joules of energy.",
-        "The Hoover Dam generates about 4 billion kilowatt-hours of electricity per year."
+        "The Hoover Dam generates about 4 billion kilowatt-hours of electricity per year.",
+        "A Big Mac contains around 2.4 million joules (570 kcal) of energy!",
+        "One liter of gasoline has about 34 million joules of energy!"
     ],
     time: [
         "A day on Venus lasts longer than a year on Venus!",
@@ -74,131 +87,30 @@ const facts = {
         "It takes 8 minutes and 20 seconds for sunlight to reach Earth.",
         "The oldest known calendar is over 10,000 years old!",
         "There are 31,536,000 seconds in a year.",
-        "The human brain processes information in just a few milliseconds."
+        "The human brain processes information in just a few milliseconds.",
+        "A year on Neptune lasts 165 Earth years!",
+        "The Earth is approximately 4.54 billion years old!"
     ]
 };
 
-// 🔄 Get Random Fact for Selected Category
-function getRandomFact(category) {
-    const categoryFacts = facts[category] || [];
-    return categoryFacts[Math.floor(Math.random() * categoryFacts.length)] || "Did you know?";
-}
-
-// 🔢 Conversion Logic
-const conversionRates = {
-    length: {
-        meter: 1,
-        kilometer: 0.001,
-        centimeter: 100,
-        millimeter: 1000,
-        mile: 0.000621371,
-        yard: 1.09361,
-        foot: 3.28084,
-        inch: 39.3701
-    },
-    weight: {
-        kilogram: 1,
-        gram: 1000,
-        milligram: 1000000,
-        pound: 2.20462,
-        ounce: 35.274
-    },
-    temperature: "custom",
-    volume: {
-        liter: 1,
-        milliliter: 1000,
-        gallon: 0.264172,
-        quart: 1.05669,
-        pint: 2.11338
-    }
-};
-
-// 📌 Load Unit Options Based on Category
-function loadUnits(category) {
-    const fromUnit = document.getElementById("fromUnit");
-    const toUnit = document.getElementById("toUnit");
-
-    fromUnit.innerHTML = "";
-    toUnit.innerHTML = "";
-
-    if (category === "temperature") {
-        ["Celsius", "Fahrenheit", "Kelvin"].forEach(unit => {
-            let option1 = new Option(unit, unit.toLowerCase());
-            let option2 = new Option(unit, unit.toLowerCase());
-            fromUnit.appendChild(option1);
-            toUnit.appendChild(option2);
-        });
-    } else {
-        for (const unit in conversionRates[category]) {
-            let option1 = new Option(unit, unit);
-            let option2 = new Option(unit, unit);
-            fromUnit.appendChild(option1);
-            toUnit.appendChild(option2);
-        }
-    }
-}
-
-// 🔄 Conversion Function
-function convert() {
-    const category = document.getElementById("categoryTitle").textContent.split(" ")[0].toLowerCase();
-    const inputValue = parseFloat(document.getElementById("inputValue").value);
-    const fromUnit = document.getElementById("fromUnit").value;
-    const toUnit = document.getElementById("toUnit").value;
-    const resultSpan = document.getElementById("result");
-
-    if (isNaN(inputValue)) {
-        resultSpan.textContent = "0";
-        return;
-    }
-
-    if (category === "temperature") {
-        resultSpan.textContent = convertTemperature(inputValue, fromUnit, toUnit);
-    } else {
-        resultSpan.textContent = (inputValue * conversionRates[category][toUnit] / conversionRates[category][fromUnit]).toFixed(4);
-    }
-}
-
-// 🌡 Temperature Conversion Logic
-function convertTemperature(value, from, to) {
-    if (from === to) return value;
-
-    let result;
-
-    if (from === "celsius") {
-        result = to === "fahrenheit" ? (value * 9/5) + 32 : value + 273.15;
-    } else if (from === "fahrenheit") {
-        result = to === "celsius" ? (value - 32) * 5/9 : ((value - 32) * 5/9) + 273.15;
-    } else if (from === "kelvin") {
-        result = to === "celsius" ? value - 273.15 : (value - 273.15) * 9/5 + 32;
-    }
-
-    return result.toFixed(2);
+// 🔄 Get Fact by Index
+function getFactByIndex(category, index) {
+    return facts[category]?.[index] || "Did you know?";
 }
 
 // ➡️ Show Next Fact
-let currentInfoIndex = 0;
 function showNextInfo() {
     const category = document.getElementById("categoryTitle").textContent.split(" ")[0].toLowerCase();
     currentInfoIndex = (currentInfoIndex + 1) % facts[category].length;
-    document.getElementById("infoText").textContent = facts[category][currentInfoIndex];
+    document.getElementById("infoText").textContent = getFactByIndex(category, currentInfoIndex);
 }
 
 // ⬅️ Show Previous Fact
 function showPreviousInfo() {
     const category = document.getElementById("categoryTitle").textContent.split(" ")[0].toLowerCase();
     currentInfoIndex = (currentInfoIndex - 1 + facts[category].length) % facts[category].length;
-    document.getElementById("infoText").textContent = facts[category][currentInfoIndex];
+    document.getElementById("infoText").textContent = getFactByIndex(category, currentInfoIndex);
 }
-
-// 🖥 Responsive Sidebar for Window Resizing
-window.addEventListener("resize", () => {
-    const sidebar = document.querySelector(".sidebar");
-    if (window.innerWidth > 768) {
-        sidebar.classList.remove("hidden");
-    } else {
-        sidebar.classList.add("hidden");
-    }
-});
 
 // 🔄 Initialize Page on Load
 document.addEventListener("DOMContentLoaded", () => {
