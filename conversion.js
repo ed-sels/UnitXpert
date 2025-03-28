@@ -79,7 +79,7 @@ const facts = {
         "1 minute is equal to 60 seconds.",
         "It takes 8 minutes and 20 seconds for sunlight to reach Earth.",
         "A year on Neptune lasts 165 Earth years!",
-        "The Earth is approximately 4.54 billion years old!"
+        "The Earth is approximately 4.54 billion years old."
     ]
 };
 
